@@ -1,4 +1,7 @@
-mfs2012
-=======
+Free Software Master 2012
+=========================
 
-Free Software Master 2012 - GNOME Workshop Project
+GNOME Workshop Project
+----------------------
+
+*Objective*: To develop and application using different GNOME technologies.
