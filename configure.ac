@@ -17,9 +17,13 @@ AC_HEADER_STDC
 
 PKG_CHECK_MODULES([DEPS],  [glib-2.0 gobject-2.0])
 
+AC_PATH_PROG([GLIB_GENMARSHAL], [glib-genmarshal])
+AC_PATH_PROG([GLIB_MKENUMS], [glib-mkenums])
+
 AC_CONFIG_FILES([
 	Makefile
 	src/Makefile
+	backend/Makefile
 ])
 
 AC_OUTPUT
