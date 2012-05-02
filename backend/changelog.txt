@@ -1,0 +1,18 @@
+Author:  José Manuel Ciges Regueiro
+Date:  2 May 2012
+
+Added search by type (movies, shows or episodes). API key can now be in a text file. Source code cleaning.
+
+This patch makes available a new version of feed-test with two fonctions added:
+- the user has now the possibility of search the term by types of content(movies, shows or episodes). This fonction was available in the GtFeed class used but not available to the user via options
+- now the API key is searched in ~/.trakttv_apikey text file if not given as parameter. It was really unconfortable having the need of writing the API key each time the tool is used.
+
+For getting options run feed-test without parameters or with -h or --help
+
+Also the tool has been modified for:
+- A better argument parsing. There is no query by default, lack of query option gives an error.
+- The source code is a lot clearer. Now is commented and 'test1' function has been renamed to query_trakttv.
+
+All modifications have been made on feed-test.c
+
+
