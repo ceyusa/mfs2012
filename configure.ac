@@ -15,11 +15,15 @@ AC_PROG_LIBTOOL
 
 AC_HEADER_STDC
 
-PKG_CHECK_MODULES([DEPS],  [glib-2.0 gobject-2.0])
+PKG_CHECK_MODULES([DEPS],  [glib-2.0
+			    gobject-2.0
+			    libsoup-2.4
+			    json-glib-1.0])
 
 AC_CONFIG_FILES([
 	Makefile
 	src/Makefile
+	backend/Makefile
 ])
 
 AC_OUTPUT
