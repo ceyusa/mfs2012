@@ -56,6 +56,7 @@ GType gt_sample_get_type (void);
 GtSample* gt_sample_new (void);
 
 void gt_sample_set_name (GtSample *self, const gchar *name);
+void gt_sample_set_number (GtSample *self, const gint number);
 void gt_sample_say_hello (GtSample *self);
 
 G_END_DECLS

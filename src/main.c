@@ -27,7 +27,7 @@ main (int argc, char **argv)
         }
 
         sample = gt_sample_new ();
-        g_object_set (sample, "name", message, NULL);
+        g_object_set (sample, "name", message, "number", 8, NULL);
         gt_sample_say_hello (sample);
         g_object_unref (sample);
 
