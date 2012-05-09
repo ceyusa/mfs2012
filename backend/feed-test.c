@@ -2,7 +2,7 @@
 
 #include "gt-feed.h"
 
-#define APIKEY_FILE ".trakttv_apikey"
+#define APIKEY_FILE "gtrakt.conf"
 
 static char *apikey;
 static char *query;
@@ -93,35 +93,98 @@ query_trakttv(void *data)
 	return FALSE;
 }
 
-static gboolean
-read_api_key()
+static inline gchar *
+read_api_key(gchar *file)
 {
-	gchar *file = NULL;
-	gchar *contents = NULL;
+	gchar *key = NULL;
+	GError *error = NULL;
+
+	GKeyFile *cfg = g_key_file_new();
+
+	if (!g_key_file_load_from_file(cfg, file, 0, &error)) {
+		g_print("Reading the API key from file %s failed: %s\n",
+			file, error->message);
+		goto bail;
+	}
+
+	key = g_key_file_get_value(cfg, "trakt", "api-key", &error);
+	if (!key || error) {
+		g_print("Can't find API key in config file %s: %s\n",
+			file, error->message);
+		goto bail;
+	}
+
+bail:
+	if (error)
+		g_error_free(error);
+
+	g_key_file_free(cfg);
+
+	return key;
+}
+
+static inline gboolean
+write_api_key(gchar *apikey, gchar *file)
+{
+	gchar *data;
+	gssize len;
 	GError *error = NULL;
 	gboolean ret = FALSE;
 
-	file = g_build_path(g_get_user_config_dir(), APIKEY_FILE, NULL);
-	if (g_file_test(file, G_FILE_TEST_EXISTS))  {
-		g_print("No API key provided nor %s file exists!\n", file);
-		goto bail;
-	}
+	GKeyFile *cfg = g_key_file_new();
 
-	if (!g_file_get_contents(file, &contents, NULL, &error))  {
-		g_print("Reading the API key from file %s failed: %s\n",
+	g_key_file_set_value(cfg, "trakt", "api-key", apikey);
+	data = g_key_file_to_data(cfg, &len, &error);
+	if (!data || error) {
+		g_print("Can't generate config file %s: %s\n",
 			file, error->message);
-		g_error_free(error);
 		goto bail;
 	}
 
-	apikey = contents;
-	g_strstrip(apikey);
+	if (!g_file_set_contents(file, data, len, &error)) {
+		g_print("Can't write config file %s: %s\n",
+			file, error->message);
+		goto bail;
+	}
+
+	ret = TRUE;
+
+bail:
+	g_key_file_free(cfg);
+
+	g_free(data);
+
+	if (error)
+		g_error_free(error);
+
+	return ret;
+
+}
+
+static gboolean
+read_or_write_api_key(gchar **apikey)
+{
+	gchar *file = NULL;
+	gboolean ret = FALSE;
+
+	file = g_build_path(G_DIR_SEPARATOR_S,
+			    g_get_user_config_dir(),
+			    APIKEY_FILE, NULL);
+
+	if (!apikey || !*apikey) {
+		if ((*apikey = read_api_key(file)) == NULL) {
+			goto bail;
+		}
+	} else {
+		if (!write_api_key(*apikey, file)) {
+			goto bail;
+		}
+	}
 
 	ret = TRUE;
 
 bail:
 	g_free(file);
-	g_free(contents);
 
 	return ret;
 }
@@ -133,6 +196,7 @@ main (int argc, char **argv)
 
 	/* argument parsing */
 	{
+		gboolean ok = FALSE;
 		GError *error = NULL;
 		GOptionContext *context;
 
@@ -140,22 +204,28 @@ main (int argc, char **argv)
 		g_option_context_add_main_entries(context, entries, NULL);
 		if (!g_option_context_parse(context, &argc, &argv, &error)) {
 			g_print("option parsing failed: %s\n", error->message);
-			return -1;
+			g_error_free(error);
+			goto bail;
 		}
 
 		if (!query) {
-			g_critical("No query provided!\n\n");
+			g_print("No query provided!\n");
+			goto bail;
+		}
 
+		if (!read_or_write_api_key(&apikey))
+			goto bail;
+
+		ok =  TRUE;
+
+	bail:
+		if (!ok)
 			g_print(g_option_context_get_help (context, TRUE, NULL));
-			return -1;
-		}
-
-		if (!apikey && !read_api_key()) {
-			g_print(g_option_context_get_help(context, TRUE, NULL));
-			return -1;
-		}
 
 		g_option_context_free(context);
+
+		if (!ok)
+			return -1;
 	}
 
 	searchtype = GT_FEED_SEARCH_MOVIES;
