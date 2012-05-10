@@ -61,24 +61,23 @@ cb(GObject *source, GAsyncResult *res, void *data)
 {
 	GError *err = NULL;
 	GtFeed *feed = GT_FEED(source);
+	GVariant *content;
 
-	if (!gt_feed_search_finish(feed, res, &err)) {
+	content = gt_feed_search_finish(feed, res, &err);
+	if (err) {
 		g_warning("Error: %s", err->message);
 		g_error_free(err);
 		goto bail;
 	}
 
-	GVariant *content;
-	g_object_get(feed, "content", &content, NULL);
-	if (content) {
-		char *str = g_variant_print(content, TRUE);
-		g_print("variant content (%c) = %s",
-			g_variant_classify(content), str);
-		g_free(str);
-	}
+	char *str = g_variant_print(content, TRUE);
+	g_print("variant content (%c) = %s",
+		g_variant_classify(content), str);
+	g_free(str);
+
+	g_variant_unref(content);
 
 bail:
-	g_variant_unref(content);
 	g_main_loop_quit(loop);
 	return;
 }

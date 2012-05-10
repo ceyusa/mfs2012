@@ -26,9 +26,8 @@
 #include <json-glib/json-glib.h>
 
 enum {
-	PROP_0,
+        PROP_0,
         PROP_APIKEY,
-	PROP_CONTENT,
 };
 
 struct _GtFeedPrivate {
@@ -52,9 +51,6 @@ get_property(GObject *object, guint property_id,
         case PROP_APIKEY:
                 g_value_set_string(value, self->priv->apikey);
                 break;
-	case PROP_CONTENT:
-		g_value_set_variant(value, self->priv->content);
-		break;
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
         }
@@ -109,13 +105,6 @@ gt_feed_class_init(GtFeedClass *klass)
 		 g_param_spec_string("api-key", "API key", "Trakt.tv API key",
 				     NULL,
 				     G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-
-	g_object_class_install_property
-		(gclass, PROP_CONTENT,
-		 g_param_spec_variant("content", "data", "Feed's content",
-				      G_VARIANT_TYPE_ANY, NULL,
-				      G_PARAM_READABLE));
-
 }
 
 static void
@@ -124,8 +113,6 @@ gt_feed_init(GtFeed *self)
 	GtFeedPrivate *priv;
 
 	self->priv = priv = GET_PRIVATE(self);
-	priv->apikey = NULL;
-
 	priv->session = soup_session_async_new();
 }
 
@@ -257,30 +244,19 @@ gt_feed_search(GtFeed *self,
 	return TRUE;
 }
 
-gboolean
+GVariant *
 parse(GtFeed *self, SoupMessage *msg, GError **err)
 {
 	const char *content = msg->response_body->data;
 	goffset length = msg->response_body->length;
 
 	if (!content || length <= 0)
-		return FALSE;
+		return NULL;
 
-	GVariant *var =
-		json_gvariant_deserialize_data(content, length, NULL, err);
-
-	if (!var)
-		return FALSE;
-
-	if (self->priv->content)
-		g_variant_unref(self->priv->content);
-
-	self->priv->content = var;
-
-	return TRUE;
+	return json_gvariant_deserialize_data(content, length, NULL, err);
 }
 
-gboolean
+GVariant *
 gt_feed_search_finish(GtFeed *self, GAsyncResult *result, GError **err)
 {
 	GSimpleAsyncResult *res = G_SIMPLE_ASYNC_RESULT(result);

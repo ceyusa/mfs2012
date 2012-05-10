@@ -72,7 +72,7 @@ GType gt_feed_get_type(void) G_GNUC_CONST;
 
 gboolean gt_feed_search(GtFeed *self, GtFeedSearchType type, const char *query,
 			GAsyncReadyCallback cb,  void *data);
-gboolean gt_feed_search_finish(GtFeed *self, GAsyncResult *res, GError **err);
+GVariant *gt_feed_search_finish(GtFeed *self, GAsyncResult *res, GError **err);
 
 G_END_DECLS
 
