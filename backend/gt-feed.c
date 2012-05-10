@@ -236,6 +236,8 @@ gt_feed_search(GtFeed *self,
 	SoupMessage *msg;
 	GSimpleAsyncResult *res;
 
+	g_return_val_if_fail(query != NULL, FALSE);
+
 	{
 		char *url = build_url(type, query, priv->apikey);
 		msg = soup_message_new(SOUP_METHOD_GET, url);
