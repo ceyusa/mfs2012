@@ -135,7 +135,7 @@ write_api_key(gchar *apikey, gchar *file)
 	GKeyFile *cfg = g_key_file_new();
 
 	g_key_file_set_value(cfg, "trakt", "api-key", apikey);
-	data = g_key_file_to_data(cfg, &len, &error);
+	data = g_key_file_to_data(cfg, (gsize *) &len, &error);
 	if (!data || error) {
 		g_print("Can't generate config file %s: %s\n",
 			file, error->message);
