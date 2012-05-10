@@ -2,8 +2,6 @@
 
 #include "gt-feed-server.h"
 
-#define APIKEY_FILE "gtrakt.conf"
-
 static GMainLoop *loop;
 
 static char *apikey;
@@ -84,102 +82,6 @@ on_name_lost(GDBusConnection *connection,
 	g_main_loop_quit(loop);
 }
 
-static inline gchar *
-read_api_key(gchar *file)
-{
-	gchar *key = NULL;
-	GError *error = NULL;
-
-	GKeyFile *cfg = g_key_file_new();
-
-	if (!g_key_file_load_from_file(cfg, file, 0, &error)) {
-		g_print("Reading the API key from file %s failed: %s\n",
-			file, error->message);
-		goto bail;
-	}
-
-	key = g_key_file_get_value(cfg, "trakt", "api-key", &error);
-	if (!key || error) {
-		g_print("Can't find API key in config file %s: %s\n",
-			file, error->message);
-		goto bail;
-	}
-
-bail:
-	if (error)
-		g_error_free(error);
-
-	g_key_file_free(cfg);
-
-	return key;
-}
-
-static inline gboolean
-write_api_key(gchar *apikey, gchar *file)
-{
-	gchar *data;
-	gssize len;
-	GError *error = NULL;
-	gboolean ret = FALSE;
-
-	GKeyFile *cfg = g_key_file_new();
-
-	g_key_file_set_value(cfg, "trakt", "api-key", apikey);
-	data = g_key_file_to_data(cfg, (gsize *) &len, &error);
-	if (!data || error) {
-		g_print("Can't generate config file %s: %s\n",
-			file, error->message);
-		goto bail;
-	}
-
-	if (!g_file_set_contents(file, data, len, &error)) {
-		g_print("Can't write config file %s: %s\n",
-			file, error->message);
-		goto bail;
-	}
-
-	ret = TRUE;
-
-bail:
-	g_key_file_free(cfg);
-
-	g_free(data);
-
-	if (error)
-		g_error_free(error);
-
-	return ret;
-
-}
-
-static gboolean
-read_or_write_api_key(gchar **apikey)
-{
-	gchar *file = NULL;
-	gboolean ret = FALSE;
-
-	file = g_build_path(G_DIR_SEPARATOR_S,
-			    g_get_user_config_dir(),
-			    APIKEY_FILE, NULL);
-
-	if (!apikey || !*apikey) {
-		if ((*apikey = read_api_key(file)) == NULL) {
-			goto bail;
-		}
-	} else {
-		if (!write_api_key(*apikey, file)) {
-			goto bail;
-		}
-	}
-
-	ret = TRUE;
-
-bail:
-	g_free(file);
-
-	return ret;
-}
-
 int
 main (int argc, char **argv)
 {
@@ -202,9 +104,6 @@ main (int argc, char **argv)
 			goto bail;
 		}
 
-		if (!read_or_write_api_key(&apikey))
-			goto bail;
-
 		ok =  TRUE;
 
 	bail:
@@ -218,7 +117,11 @@ main (int argc, char **argv)
 	}
 
 	loop = g_main_loop_new(NULL, TRUE);
-	server = g_object_new(GT_TYPE_FEED_SERVER, "api-key", apikey, NULL);
+
+	server = g_object_new(GT_TYPE_FEED_SERVER, NULL);
+
+	if (apikey)
+		g_object_set(server, "api-key", apikey, NULL);
 
 	owner_id = g_bus_own_name(G_BUS_TYPE_SESSION,
 				  "org.mfs.Gtrakt.FeedServer",

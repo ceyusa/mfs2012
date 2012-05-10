@@ -35,6 +35,8 @@ enum {
     LAST_SIGNAL,
 };
 
+#define APIKEY_FILE "traktor.conf"
+
 static guint signals[LAST_SIGNAL] = {0};
 static GParamSpec *properties[PROP_LAST];
 
@@ -47,6 +49,8 @@ struct _GtFeedPrivate {
 	(G_TYPE_INSTANCE_GET_PRIVATE((obj), GT_TYPE_FEED, GtFeedPrivate))
 
 G_DEFINE_TYPE(GtFeed, gt_feed, G_TYPE_OBJECT)
+
+static gboolean read_or_write_api_key(gchar **apikey);
 
 static void
 get_property(GObject *object, guint property_id,
@@ -136,6 +140,8 @@ gt_feed_init(GtFeed *self)
 
 	self->priv = priv = GET_PRIVATE(self);
 	priv->session = soup_session_async_new();
+
+	read_or_write_api_key(&priv->apikey);
 }
 
 static void
@@ -254,6 +260,7 @@ gt_feed_search(GtFeed *self,
 	GSimpleAsyncResult *res;
 
 	g_return_val_if_fail(query != NULL, FALSE);
+	g_return_val_if_fail(priv->apikey != NULL, FALSE);
 	g_return_val_if_fail(type >= GT_FEED_SEARCH_MOVIES ||
 			     type < GT_FEED_SEARCH_MAX, FALSE);
 
@@ -311,8 +318,14 @@ gt_feed_set_apikey(GtFeed *self, const gchar *apikey)
 		return;
 
 	priv = self->priv;
+
+	if (g_strcmp0(apikey, priv->apikey) == 0)
+		return;
+
 	g_free(priv->apikey);
 	priv->apikey = g_strdup(apikey);
+
+	read_or_write_api_key(&priv->apikey);
 
 	g_object_notify_by_pspec(G_OBJECT(self), properties[PROP_APIKEY]);
 }
@@ -322,4 +335,100 @@ GQuark
 gt_feed_error_quark(void)
 {
 	return g_quark_from_static_string ("gt-feed-error-quark");
+}
+
+static inline gchar *
+read_api_key(gchar *file)
+{
+	gchar *key = NULL;
+	GError *error = NULL;
+
+	GKeyFile *cfg = g_key_file_new();
+
+	if (!g_key_file_load_from_file(cfg, file, 0, &error)) {
+		g_print("Reading the API key from file %s failed: %s\n",
+			file, error->message);
+		goto bail;
+	}
+
+	key = g_key_file_get_value(cfg, "trakt", "api-key", &error);
+	if (!key || error) {
+		g_print("Can't find API key in config file %s: %s\n",
+			file, error->message);
+		goto bail;
+	}
+
+bail:
+	if (error)
+		g_error_free(error);
+
+	g_key_file_free(cfg);
+
+	return key;
+}
+
+static inline gboolean
+write_api_key(gchar *apikey, gchar *file)
+{
+	gchar *data;
+	gssize len;
+	GError *error = NULL;
+	gboolean ret = FALSE;
+
+	GKeyFile *cfg = g_key_file_new();
+
+	g_key_file_set_value(cfg, "trakt", "api-key", apikey);
+	data = g_key_file_to_data(cfg, (gsize *) &len, &error);
+	if (!data || error) {
+		g_print("Can't generate config file %s: %s\n",
+			file, error->message);
+		goto bail;
+	}
+
+	if (!g_file_set_contents(file, data, len, &error)) {
+		g_print("Can't write config file %s: %s\n",
+			file, error->message);
+		goto bail;
+	}
+
+	ret = TRUE;
+
+bail:
+	g_key_file_free(cfg);
+
+	g_free(data);
+
+	if (error)
+		g_error_free(error);
+
+	return ret;
+
+}
+
+static gboolean
+read_or_write_api_key(gchar **apikey)
+{
+	gchar *file = NULL;
+	gboolean ret = FALSE;
+
+	file = g_build_path(G_DIR_SEPARATOR_S,
+			    g_get_user_config_dir(),
+			    APIKEY_FILE, NULL);
+
+	if (!apikey || !*apikey) {
+		if ((*apikey = read_api_key(file)) == NULL) {
+			goto bail;
+		}
+	} else {
+		if (!write_api_key(*apikey, file)) {
+			goto bail;
+		}
+	}
+
+	ret = TRUE;
+
+bail:
+	g_free(file);
+
+	return ret;
 }
