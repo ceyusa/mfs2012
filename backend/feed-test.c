@@ -64,6 +64,7 @@ cb(GObject *source, GAsyncResult *res, void *data)
 
 	if (!gt_feed_search_finish(feed, res, &err)) {
 		g_warning("Error: %s", err->message);
+		g_error_free(err);
 		goto bail;
 	}
 
