@@ -77,6 +77,7 @@ cb(GObject *source, GAsyncResult *res, void *data)
 	}
 
 bail:
+	g_variant_unref(content);
 	g_main_loop_quit(loop);
 	return;
 }

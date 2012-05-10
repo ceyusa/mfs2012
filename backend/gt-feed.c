@@ -272,6 +272,9 @@ parse(GtFeed *self, SoupMessage *msg, GError **err)
 	if (!var)
 		return FALSE;
 
+	if (self->priv->content)
+		g_variant_unref(self->priv->content);
+
 	self->priv->content = var;
 
 	return TRUE;
