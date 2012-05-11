@@ -74,6 +74,8 @@ gboolean gt_feed_search(GtFeed *self, GtFeedSearchType type, const char *query,
 			GAsyncReadyCallback cb,  void *data);
 GVariant *gt_feed_search_finish(GtFeed *self, GAsyncResult *res, GError **err);
 
+void gt_feed_set_apikey(GtFeed *self, const gchar *apikey);
+
 G_END_DECLS
 
 #endif /* __GT_FEED_H__ */

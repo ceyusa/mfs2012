@@ -26,9 +26,11 @@
 #include <json-glib/json-glib.h>
 
 enum {
-        PROP_0,
-        PROP_APIKEY,
+        PROP_APIKEY = 1,
+        PROP_LAST
 };
+
+static GParamSpec *properties[PROP_LAST];
 
 struct _GtFeedPrivate {
 	char *apikey;
@@ -64,8 +66,7 @@ set_property(GObject *object, guint property_id,
 
         switch (property_id) {
         case PROP_APIKEY:
-		g_free(self->priv->apikey);
-		self->priv->apikey = g_value_dup_string(value);
+		gt_feed_set_apikey(self, g_value_get_string(value));
                 break;
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
@@ -100,11 +101,15 @@ gt_feed_class_init(GtFeedClass *klass)
 
 	g_type_class_add_private(klass, sizeof(GtFeedPrivate));
 
-	g_object_class_install_property
-		(gclass, PROP_APIKEY,
-		 g_param_spec_string("api-key", "API key", "Trakt.tv API key",
-				     NULL,
-				     G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+	properties[PROP_APIKEY] = g_param_spec_string("api-key",
+						      "API key",
+						      "Trakt.tv API key",
+						      NULL,
+						      G_PARAM_READWRITE |
+						      G_PARAM_CONSTRUCT |
+						      G_PARAM_STATIC_STRINGS);
+
+	g_object_class_install_properties(gclass, PROP_LAST, properties);
 }
 
 static void
@@ -267,6 +272,24 @@ gt_feed_search_finish(GtFeed *self, GAsyncResult *result, GError **err)
 	SoupMessage *msg = g_simple_async_result_get_op_res_gpointer(res);
 	return parse(self, msg, err);
 }
+
+void
+gt_feed_set_apikey(GtFeed *self, const gchar *apikey)
+{
+	GtFeedPrivate *priv;
+
+	g_return_if_fail(self);
+
+	if (!apikey)
+		return;
+
+	priv = self->priv;
+	g_free(priv->apikey);
+	priv->apikey = g_strdup(apikey);
+
+	g_object_notify_by_pspec(self, properties[PROP_APIKEY]);
+}
+
 
 GQuark
 gt_feed_error_quark(void)
