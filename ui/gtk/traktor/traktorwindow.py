@@ -42,7 +42,10 @@ class TraktorWindow(Gtk.Window):
         return ui_manager
 
     def _on_about_action(self, action):
-        print 'Preferences action activated [DELETE THIS WHEN THE ABOUT IS IMPLEMENTED]'
+        about = Gtk.AboutDialog()
+        about.set_program_name("Traktor")
+        about.run()
+        about.destroy()
 
     def _quit(self, window, event):
         Gtk.main_quit()
