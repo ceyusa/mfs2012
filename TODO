@@ -8,5 +8,5 @@
    ver el código que se genera
 
 + Hacer que GtFeed emita una señal cuando recibe el callback de
-   libsoup
+   libsoup (Francisco Rocha)
 
