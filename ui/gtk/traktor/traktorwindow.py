@@ -32,6 +32,8 @@ class TraktorWindow(Gtk.Window):
         column = Gtk.TreeViewColumn('Description', renderer, text=2)
         view.append_column(column)
 
+        view.connect('row-activated', self._on_row_activated)
+
 
         self.ui_manager = self._setup_ui_manager()
         menu_bar = self.ui_manager.get_widget('/MenuBar')
@@ -68,6 +70,10 @@ class TraktorWindow(Gtk.Window):
         about.set_program_name("Traktor")
         about.run()
         about.destroy()
+
+    def _on_row_activated(self, tree_view, path, column):
+        item = tree_view.get_model().get_iter(path)
+        print 'Title:', tree_view.get_model().get_value(item, 1)
 
     def _quit(self, window, event):
         Gtk.main_quit()
