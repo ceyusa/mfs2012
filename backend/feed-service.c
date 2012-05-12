@@ -24,7 +24,6 @@ static GOptionEntry entries[] = {
 static void
 print_peer_credentials(GDBusConnection *connection)
 {
-	guint registration_id;
 	GCredentials *credentials;
 	gchar *s;
 
@@ -61,7 +60,7 @@ on_bus_acquired(GDBusConnection *connection,
 						  "/org/mfs/Gtrakt/FeedServer",
 						  &error);
 
-	if (error) {
+	if (error || registration_id <= 0) {
 		g_critical("Couldn't register the feed server: %s\nQuitting...",
 			   error->message);
 		g_error_free(error);
