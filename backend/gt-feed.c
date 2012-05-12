@@ -229,6 +229,8 @@ gt_feed_search(GtFeed *self,
 	GSimpleAsyncResult *res;
 
 	g_return_val_if_fail(query != NULL, FALSE);
+	g_return_val_if_fail(type >= GT_FEED_SEARCH_MOVIES ||
+			     type < GT_FEED_SEARCH_MAX, FALSE);
 
 	{
 		char *url = build_url(type, query, priv->apikey);

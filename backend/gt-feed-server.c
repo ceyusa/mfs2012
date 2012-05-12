@@ -175,6 +175,15 @@ query(GtFeedServer *self,
 		return;
 	}
 
+	if (type < GT_FEED_SEARCH_MOVIES || type >= GT_FEED_SEARCH_MAX) {
+		g_dbus_method_invocation_return_error
+			(invocation,
+			 GT_FEED_SERVER_ERROR,
+			 GT_FEED_SERVICE_ERROR_MISSING_PARAMETER,
+			 "Search type is not valid.");
+		return;
+	}
+
 	res = gt_feed_search(feed, type, query, cb, invocation);
 	g_free(query);
 

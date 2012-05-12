@@ -31,6 +31,7 @@ typedef enum {
 	GT_FEED_SEARCH_MOVIES,
 	GT_FEED_SEARCH_SHOWS,
 	GT_FEED_SEARCH_EPISODES,
+	GT_FEED_SEARCH_MAX
 } GtFeedSearchType;
 
 typedef enum {
