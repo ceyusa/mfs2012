@@ -252,7 +252,7 @@ gt_feed_server_set_apikey(GtFeedServer *self, const gchar *apikey)
 {
 	g_return_if_fail(self && self->priv && self->priv->feed && apikey);
 
-	g_object_set(self->priv->feed, "api-key", apikey);
+	g_object_set(self->priv->feed, "api-key", apikey, NULL);
 }
 
 static const GDBusErrorEntry dbus_errors[] = {
