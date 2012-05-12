@@ -5,7 +5,7 @@
 + Hacer que el método de Query por D-Bus sea asíncrono (Antonio Arias)
 
 + Hacer una version mínima en Vala de un servicio en dbus asíncrono y
-   ver el código que se genera
+   ver el código que se genera (Jorge Muñoz)
 
 + Hacer que GtFeed emita una señal cuando recibe el callback de
    libsoup (Francisco Rocha)
