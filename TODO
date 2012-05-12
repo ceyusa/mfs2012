@@ -1,6 +1,6 @@
 * backend
 
-+ Eliminar uso de API key y usar sólo el GKeyConfig file (Antonio Arias)
++ Eliminar uso de API key y usar sólo el GKeyConfig file
 
 + Hacer que el método de Query por D-Bus sea asíncrono
 
