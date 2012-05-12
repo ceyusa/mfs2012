@@ -30,6 +30,12 @@ enum {
         PROP_LAST
 };
 
+enum {
+    RESPONSE_RECEIVED,
+    LAST_SIGNAL,
+};
+
+static guint signals[LAST_SIGNAL] = {0};
 static GParamSpec *properties[PROP_LAST];
 
 struct _GtFeedPrivate {
@@ -107,6 +113,20 @@ gt_feed_class_init(GtFeedClass *klass)
 						      G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties(gclass, PROP_LAST, properties);
+
+	signals[RESPONSE_RECEIVED] =
+                        g_signal_newv("response-received",
+				      G_TYPE_FROM_CLASS(klass),
+				      G_SIGNAL_RUN_LAST |
+				      G_SIGNAL_NO_RECURSE |
+				      G_SIGNAL_NO_HOOKS,
+				      NULL,
+				      NULL,
+				      NULL,
+				      g_cclosure_marshal_VOID__VOID,
+				      G_TYPE_NONE,
+				      0,
+				      NULL);
 }
 
 static void
@@ -189,8 +209,14 @@ reply_cb(SoupSession *session,
 {
 	GSimpleAsyncResult *res = G_SIMPLE_ASYNC_RESULT(data);
 
+	GtFeed *self = g_async_result_get_source_object(res);
+
 	if (msg->status_code != SOUP_STATUS_OK)
 		set_error(msg, res);
+	else
+		g_signal_emit(self, signals[RESPONSE_RECEIVED], 0);
+
+	g_object_unref(self);
 
 	g_simple_async_result_complete(res);
 	g_object_unref(res);
