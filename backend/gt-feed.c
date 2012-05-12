@@ -209,7 +209,9 @@ reply_cb(SoupSession *session,
 {
 	GSimpleAsyncResult *res = G_SIMPLE_ASYNC_RESULT(data);
 
-	GtFeed *self = g_async_result_get_source_object(res);
+	GtFeed *self = GT_FEED(
+		g_async_result_get_source_object(G_ASYNC_RESULT(res))
+		);
 
 	if (msg->status_code != SOUP_STATUS_OK)
 		set_error(msg, res);
@@ -312,7 +314,7 @@ gt_feed_set_apikey(GtFeed *self, const gchar *apikey)
 	g_free(priv->apikey);
 	priv->apikey = g_strdup(apikey);
 
-	g_object_notify_by_pspec(self, properties[PROP_APIKEY]);
+	g_object_notify_by_pspec(G_OBJECT(self), properties[PROP_APIKEY]);
 }
 
 
