@@ -150,7 +150,8 @@ cb(GObject *source,
 		return;
 	}
 
-	g_dbus_method_invocation_return_value(invocation, content);
+	g_dbus_method_invocation_return_value(invocation,
+					      g_variant_new_tuple(&content,1));
 }
 
 static void
