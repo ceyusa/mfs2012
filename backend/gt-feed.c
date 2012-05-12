@@ -35,7 +35,6 @@ static GParamSpec *properties[PROP_LAST];
 struct _GtFeedPrivate {
 	char *apikey;
 	SoupSession *session;
-	GVariant *content;
 };
 
 #define GET_PRIVATE(obj) \
@@ -86,8 +85,6 @@ finalize(GObject *object)
 {
         GtFeed *self = GT_FEED(object);
         g_free(self->priv->apikey);
-	if (self->priv->content)
-		g_variant_unref(self->priv->content);
         G_OBJECT_CLASS(gt_feed_parent_class)->finalize(object);
 }
 static void
