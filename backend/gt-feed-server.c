@@ -144,12 +144,12 @@ cb(GObject *source,
 	GtFeed *feed = GT_FEED(source);
 	GDBusMethodInvocation *invocation = data;
 
-	if (!gt_feed_search_finish(feed, res, &error)) {
+	content = gt_feed_search_finish(feed, res, &error);
+	if (error) {
 		g_dbus_method_invocation_take_error(invocation, error);
 		return;
 	}
 
-	g_object_get(feed, "content", &content, NULL);
 	g_dbus_method_invocation_return_value(invocation, content);
 }
 
