@@ -70,6 +70,7 @@ cb(GObject *source, GAsyncResult *res, void *data)
 		goto bail;
 	}
 
+	g_print("--> %s\n", g_variant_get_type_string(content));
 	char *str = g_variant_print(content, TRUE);
 	g_print("variant content (%c) = %s",
 		g_variant_classify(content), str);
