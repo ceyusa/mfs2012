@@ -158,18 +158,13 @@ query(GtFeedServer *self,
       GVariant *parameters,
       GDBusMethodInvocation *invocation)
 {
-	gchar *apikey, *query;
+	gchar *query;
 	gint type;
 	gboolean res;
 	GtFeed *feed = self->priv->feed;
 
-	apikey = query = NULL;
-	g_variant_get(parameters, "(ssi)", &apikey, &query, &type);
-
-	if (apikey) {
-		g_object_set(feed, "api-key", apikey, NULL);
-		g_free(apikey);
-	}
+	query = NULL;
+	g_variant_get(parameters, "(si)", &query, &type);
 
 	if (!query) {
 		g_dbus_method_invocation_return_error

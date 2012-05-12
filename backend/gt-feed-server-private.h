@@ -30,7 +30,6 @@ static const gchar interface_xml[] =
   "<node>"
   "  <interface name='org.mfs.Gtrakt.FeedServer'>"
   "    <method name='Query'>"
-  "      <arg type='s' name='apikey' direction='in'/>"
   "      <arg type='s' name='query' direction='in'/>"
   "      <arg type='i' name='type' direction='in'/>"
   "      <arg type='av' name='response' direction='out'/>"
