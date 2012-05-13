@@ -38,7 +38,7 @@ def test_feed_server_movie():
 def test_feed_server_no_results():
     feed_server = FeedServer()
     result = feed_server.search('3172708766b5655033d176fedbd014dab9137d6f')
-    assert result == None
+    assert len(result) == 0
 
 
 if __name__ == '__main__':
