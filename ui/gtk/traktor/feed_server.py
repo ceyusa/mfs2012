@@ -1,5 +1,8 @@
 " Encapsulates D-Bus calls. "
+import gobject
+
 import dbus
+import dbus.mainloop.glib
 
 from constants import *
 
@@ -11,6 +14,7 @@ OBJECT_PATH = '/org/mfs/Gtrakt/FeedServer'
 class FeedServer:
     """ Proxy to query D-Bus service.  """
     def __init__(self):
+        dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
         session_bus = dbus.SessionBus()
         try:
             proxy = session_bus.get_object(BUS_NAME, OBJECT_PATH)
@@ -18,27 +22,80 @@ class FeedServer:
             print("ERROR: Not found service")
             raise
         self.iface = dbus.Interface(proxy, dbus_interface=BUS_NAME)
+        self.last_result = None
+        self.error = None
 
-    def search(self, query, query_type=SEARCH_MOVIES_TYPE):
+    def search(self, query, callback=None, query_type=SEARCH_MOVIES_TYPE):
+        self._callback = callback
         try:
-            feed = self.iface.Query(query, query_type)
+            feed = self.iface.Query(query, query_type,
+                                    reply_handler=self.handle_result,
+                                    error_handler=self.handle_error)
         except dbus.exceptions.DBusException:
             print("ERROR: Unable to connect")
             raise
-        return feed
+
+    def run(self):
+        self.loop = gobject.MainLoop()
+        self.loop.run()
+
+    def stop(self):
+        self.loop.quit()
+
+    def handle_result(self, res):
+        self.last_result = res
+        self.on_reply()
+        self.stop()
+
+    def handle_error(self, err):
+        self.error = err
+        self.on_reply()
+        self.stop()
+
+    def _set_last_result(self, res):
+        self._res = res
+
+    def _get_last_result(self):
+        return self._res
+    last_result = property(_get_last_result, _set_last_result)
+
+    def _set_error(self, err):
+        self._err = err
+
+    def _get_error(self):
+        return _err
+    error = property(_get_error, _set_error)
+
+    def on_reply(self):
+        if self._callback != None:
+            self._callback(self.last_result)
 
 
 def test_feed_server_movie():
     feed_server = FeedServer()
-    result = feed_server.search('batman')
+    feed_server.search('batman')
+    feed_server.run()
+    result = feed_server.last_result
     assert hasattr(result, "__getitem__")
     assert hasattr(result, "__iter__")
 
 
 def test_feed_server_no_results():
     feed_server = FeedServer()
-    result = feed_server.search('3172708766b5655033d176fedbd014dab9137d6f')
+    feed_server.search('3172708766b5655033d176fedbd014dab9137d6f')
+    feed_server.run()
+    result = feed_server.last_result
     assert len(result) == 0
+
+
+
+def test_async():
+    def the_callback(result):
+        assert hasattr(result, "__getitem__")
+        assert hasattr(result, "__iter__")
+    feed_server = FeedServer()
+    feed_server.search('batman', the_callback)
+    feed_server.run()
 
 
 if __name__ == '__main__':
