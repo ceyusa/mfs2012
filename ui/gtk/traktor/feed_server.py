@@ -24,6 +24,7 @@ class FeedServer:
         self.props = dbus.Interface(proxy, 'org.freedesktop.DBus.Properties')
         self.last_result = None
         self.error = None
+        self.loop = None
 
     def apikey_get(self):
         try:
@@ -55,7 +56,8 @@ class FeedServer:
         self.loop.run()
 
     def stop(self):
-        self.loop.quit()
+        if self.loop:
+            self.loop.quit()
 
     def handle_result(self, res):
         self.last_result = res
