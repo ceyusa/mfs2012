@@ -40,7 +40,7 @@ class FeedServer:
             print("ERROR: Unable to connect")
             raise
 
-    def search(self, query, callback=None, query_type=SEARCH_MOVIES_TYPE):
+    def search(self, query, query_type=SEARCH_MOVIES_TYPE, callback=None):
         self._callback = callback
         try:
             feed = self.iface.Query(query, query_type,
@@ -116,7 +116,7 @@ def test_async():
         assert hasattr(result, "__getitem__")
         assert hasattr(result, "__iter__")
     feed_server = FeedServer()
-    feed_server.search('batman', the_callback)
+    feed_server.search('batman', SEARCH_MOVIES_TYPE, the_callback)
     feed_server.run()
 
 if __name__ == '__main__':
