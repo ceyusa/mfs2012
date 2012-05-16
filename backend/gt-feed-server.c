@@ -134,6 +134,57 @@ gt_feed_server_new(const gchar *apikey)
         return g_object_new(GT_TYPE_FEED_SERVER, "api-key", apikey);
 }
 
+static GVariant*
+filter_search_result(GVariant *content)
+{
+        GVariant *data = NULL;
+        GVariantBuilder *builder = NULL;
+        GVariant *newArray = NULL;
+        GVariantBuilder *builder2 = NULL;
+        GVariant *emptyString = g_variant_new("s", "");
+
+        GVariant *array = NULL;
+        GVariantIter *arrayIter = NULL;
+        GVariant *array2 = NULL;
+        GVariantIter *array2Iter = NULL;
+        GVariant *key = NULL;
+        GVariant *value = NULL;
+
+        if (!content)
+                return NULL;
+
+	builder = g_variant_builder_new(G_VARIANT_TYPE("av"));
+
+	g_variant_get(content, "av", &arrayIter);
+	while (g_variant_iter_loop (arrayIter, "v", &array2)) {
+		builder2 = g_variant_builder_new(G_VARIANT_TYPE("a{sv}"));
+
+		g_variant_get(array2, "a{sv}", &array2Iter);
+
+		while (g_variant_iter_loop (array2Iter, "{sv}", &key, &value)) {
+			if (!g_variant_is_of_type(value, G_VARIANT_TYPE_MAYBE)) {
+				g_variant_builder_add(builder2, "{sv}", key, value);
+			} else {
+				g_variant_builder_add(builder2, "{sv}", key, emptyString);
+			}
+		}
+		g_variant_iter_free(array2Iter);
+
+		newArray = g_variant_new("a{sv}", builder2);
+		g_variant_builder_add(builder, "v", newArray);
+		g_variant_builder_unref(builder2);
+	}
+
+	g_variant_iter_free(arrayIter);
+
+	data = g_variant_new("av", builder);
+	g_variant_builder_unref(builder);
+
+	g_variant_unref(content);
+
+        return data;
+}
+
 static void
 cb(GObject *source,
    GAsyncResult *res,
@@ -144,7 +195,7 @@ cb(GObject *source,
 	GtFeed *feed = GT_FEED(source);
 	GDBusMethodInvocation *invocation = data;
 
-	content = gt_feed_search_finish(feed, res, &error);
+	content = filter_search_result(gt_feed_search_finish(feed, res, &error));
 	if (error) {
 		g_dbus_method_invocation_take_error(invocation, error);
 		return;
