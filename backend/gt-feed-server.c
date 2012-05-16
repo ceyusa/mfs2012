@@ -248,6 +248,33 @@ query(GtFeedServer *self,
 }
 
 static void
+apikey_get(GtFeedServer *self,
+	   GVariant *parameters,
+	   GDBusMethodInvocation *invocation)
+{
+    gchar *apikey = NULL;
+    g_object_get(self, "api-key", &apikey);
+    GVariant *result = g_variant_new("s", apikey);
+	g_dbus_method_invocation_return_value(invocation,
+					      g_variant_new_tuple(&result, 1));
+
+    g_free(apikey);
+}
+
+static void
+apikey_set(GtFeedServer *self,
+	   GVariant *parameters,
+	   GDBusMethodInvocation *invocation)
+{
+    gchar *apikey = NULL;
+    g_variant_get(parameters, "(s)", &apikey);
+    g_object_set(self, "api-key", apikey, NULL);
+    g_dbus_method_invocation_return_value(invocation, NULL);
+
+    g_free(apikey);
+}
+
+static void
 method_call(GDBusConnection *connection,
 	    const gchar *sender,
 	    const gchar *object_path,
@@ -261,6 +288,10 @@ method_call(GDBusConnection *connection,
 
 	if (g_strcmp0(method_name, "Query") == 0) {
 		query(self, parameters, invocation);
+	} else if (g_strcmp0(method_name, "Apikey_get") == 0) {
+		apikey_get(self, parameters, invocation);
+	} else if (g_strcmp0(method_name, "Apikey_set") == 0) {
+		apikey_set(self, parameters, invocation);
 	} else {
 		g_object_unref(invocation);
 	}
