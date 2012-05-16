@@ -25,6 +25,21 @@ class FeedServer:
         self.last_result = None
         self.error = None
 
+    def apikey_get(self):
+        try:
+            apikey= self.iface.Apikey_get()
+        except dbus.exceptions.DBusException:
+            print("ERROR: Unable to connect")
+            raise
+        return apikey
+
+    def apikey_set(self, apikey):
+        try:
+            self.iface.Apikey_set(apikey)
+        except dbus.exceptions.DBusException:
+            print("ERROR: Unable to connect")
+            raise
+
     def search(self, query, callback=None, query_type=SEARCH_MOVIES_TYPE):
         self._callback = callback
         try:
@@ -70,6 +85,14 @@ class FeedServer:
         if self._callback != None:
             self._callback(self.last_result)
 
+def test_feed_change_apikey():
+    feed_server = FeedServer()
+    old_apikey = feed_server.apikey_get();
+    print("old apikey: " + old_apikey)
+    feed_server.apikey_set("1234")
+    print("new apikey: " + feed_server.apikey_get())
+    feed_server.apikey_set(old_apikey)
+    print("    apikey: " + feed_server.apikey_get())
 
 def test_feed_server_movie():
     feed_server = FeedServer()
