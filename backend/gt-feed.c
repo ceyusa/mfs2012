@@ -285,7 +285,7 @@ parse(GtFeed *self, SoupMessage *msg, GError **err)
 	if (!content || length <= 0)
 		return NULL;
 
-	return json_gvariant_deserialize_data(content, length, NULL, err);
+	return json_gvariant_deserialize_data(content, length, "av", err);
 }
 
 GVariant *
