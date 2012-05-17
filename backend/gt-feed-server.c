@@ -134,55 +134,52 @@ gt_feed_server_new(const gchar *apikey)
 	return g_object_new(GT_TYPE_FEED_SERVER, "api-key", apikey);
 }
 
-static GVariant*
-filter_search_result(GVariant *content)
+static GVariant *
+deal_maybe(GVariant *item)
 {
-	GVariant *data = NULL;
-	GVariantBuilder *builder = NULL;
-	GVariant *newArray = NULL;
-	GVariantBuilder *builder2 = NULL;
-	GVariant *emptyString = g_variant_new("s", "");
+	GVariant *child;
 
-	GVariant *array = NULL;
-	GVariantIter *arrayIter = NULL;
-	GVariant *array2 = NULL;
-	GVariantIter *array2Iter = NULL;
-	GVariant *key = NULL;
-	GVariant *value = NULL;
+	if (!g_variant_is_of_type(item, G_VARIANT_TYPE_MAYBE))
+		return item;
 
-	if (!content)
-		return NULL;
+	child = g_variant_get_maybe(item);
+	if (!child)
+		return g_variant_new_string("");
 
-	builder = g_variant_builder_new(G_VARIANT_TYPE("av"));
+	return child;
+}
 
-	g_variant_get(content, "av", &arrayIter);
-	while (g_variant_iter_loop (arrayIter, "v", &array2)) {
-		builder2 = g_variant_builder_new(G_VARIANT_TYPE("a{sv}"));
 
-		g_variant_get(array2, "a{sv}", &array2Iter);
+static GVariant *
+filter_item(GVariant *item)
+{
+	GVariantBuilder *builder;
+	GVariantIter iter;
+	GVariant *child;
 
-		while (g_variant_iter_loop (array2Iter, "{sv}", &key, &value)) {
-			if (!g_variant_is_of_type(value, G_VARIANT_TYPE_MAYBE)) {
-				g_variant_builder_add(builder2, "{sv}", key, value);
-			} else {
-				g_variant_builder_add(builder2, "{sv}", key, emptyString);
-			}
-		}
-		g_variant_iter_free(array2Iter);
-
-		newArray = g_variant_new("a{sv}", builder2);
-		g_variant_builder_add(builder, "v", newArray);
-		g_variant_builder_unref(builder2);
+	if (!g_variant_is_container(item)) {
+		return deal_maybe(item);
 	}
 
-	g_variant_iter_free(arrayIter);
+	builder = g_variant_builder_new(g_variant_get_type(item));
+	g_variant_iter_init(&iter, item);
 
-	data = g_variant_new("av", builder);
-	g_variant_builder_unref(builder);
+	while ((child = g_variant_iter_next_value(&iter))) {
+		g_variant_builder_add_value(builder,
+					    filter_item(deal_maybe(child)));
+		g_variant_unref(child);
+	}
 
-	g_variant_unref(content);
+	return g_variant_builder_end(builder);
+}
 
-	return data;
+static GVariant *
+filter_search_result(GVariant *content)
+{
+	if (g_variant_n_children(content) == 0)
+		return content;
+
+	return filter_item(content);
 }
 
 static void
@@ -195,12 +192,13 @@ cb(GObject *source,
 	GtFeed *feed = GT_FEED(source);
 	GDBusMethodInvocation *invocation = data;
 
-	content = filter_search_result(gt_feed_search_finish(feed, res, &error));
+	content = gt_feed_search_finish(feed, res, &error);
 	if (error) {
 		g_dbus_method_invocation_take_error(invocation, error);
 		return;
 	}
 
+	content = filter_search_result(content);
 	g_dbus_method_invocation_return_value(invocation,
 					      g_variant_new_tuple(&content,1));
 }
