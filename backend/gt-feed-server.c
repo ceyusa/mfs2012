@@ -134,6 +134,7 @@ gt_feed_server_new(const gchar *apikey)
         return g_object_new(GT_TYPE_FEED_SERVER, "api-key", apikey);
 }
 
+
 static GVariant*
 filter_search_result(GVariant *content)
 {
@@ -182,7 +183,37 @@ filter_search_result(GVariant *content)
 
 	g_variant_unref(content);
 
-        return data;
+	return data;
+}
+
+static GVariant *
+get_response(GVariant **content)
+{
+	gchar *key;
+	GVariant *res, *tmp, *value;
+	GVariantIter iter, iter2;
+
+	/* char *str = g_variant_print(*content, TRUE); */
+	gsize num = g_variant_n_children(*content);
+	g_message("%s - %ld\n%s\n", g_variant_get_type_string(*content), num, "");
+	/* g_free(str); */
+
+	g_variant_iter_init(&iter, *content);
+	while (g_variant_iter_loop(&iter, "v", &tmp)) {
+		gsize num = g_variant_n_children(tmp);
+		g_message("\t%s - %ld\n", g_variant_get_type_string(tmp), num);
+
+		g_variant_iter_init(&iter2, tmp);
+		while (g_variant_iter_loop(&iter2, "{sv}", &key, &value)) {
+			g_message("\t\t%s - %s - %ld\n", key,
+				  g_variant_get_type_string(value));
+		}
+	}
+
+	res = g_variant_new_tuple(content, 1);
+	g_message("--> %s\n", g_variant_get_type_string(res));
+
+	return res;
 }
 
 static void
@@ -190,19 +221,23 @@ cb(GObject *source,
    GAsyncResult *res,
    void *data)
 {
-	GVariant *content;
+	GVariant *content, *response;
 	GError *error = NULL;
 	GtFeed *feed = GT_FEED(source);
 	GDBusMethodInvocation *invocation = data;
 
-	content = filter_search_result(gt_feed_search_finish(feed, res, &error));
+	content = gt_feed_search_finish(feed, res, &error);
+
 	if (error) {
 		g_dbus_method_invocation_take_error(invocation, error);
 		return;
 	}
 
-	g_dbus_method_invocation_return_value(invocation,
-					      g_variant_new_tuple(&content,1));
+	response = get_response(&content);
+	content = filter_search_result(content);
+	g_variant_unref(response);
+
+	g_dbus_method_invocation_return_value(invocation, content);
 }
 
 static void
