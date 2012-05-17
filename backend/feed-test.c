@@ -92,7 +92,8 @@ static gboolean
 query_trakttv(void *data)
 {
 	GtFeed *feed = g_object_new(GT_TYPE_FEED, "api-key", apikey, NULL);
-	g_signal_connect (feed, "response-received", G_CALLBACK (response_received_callback), NULL);
+	g_signal_connect(feed, "response-received",
+			 G_CALLBACK(response_received_callback), NULL);
 	if (!gt_feed_search(feed, searchtype, query, cb, NULL)) {
 		g_main_loop_quit(loop);
 	}
