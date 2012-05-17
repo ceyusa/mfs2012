@@ -88,11 +88,12 @@ class FeedServer:
 def test_feed_change_apikey():
     feed_server = FeedServer()
     old_apikey = feed_server.apikey_get();
-    print("old apikey: " + old_apikey)
-    feed_server.apikey_set("1234")
-    print("new apikey: " + feed_server.apikey_get())
+    new_apikey = "1234"
+    feed_server.apikey_set(new_apikey)
+    assert new_apikey == feed_server.apikey_get()
     feed_server.apikey_set(old_apikey)
-    print("    apikey: " + feed_server.apikey_get())
+    old_apikey_reset = feed_server.apikey_get();
+    assert old_apikey == old_apikey_reset
 
 def test_feed_server_movie():
     feed_server = FeedServer()
