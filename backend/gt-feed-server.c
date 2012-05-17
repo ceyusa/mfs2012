@@ -31,7 +31,7 @@ G_DEFINE_TYPE(GtFeedServer, gt_feed_server, G_TYPE_OBJECT)
   (G_TYPE_INSTANCE_GET_PRIVATE((o), GT_TYPE_FEED_SERVER, GtFeedServerPrivate))
 
 enum {
-        PROP_APIKEY = 1,
+	PROP_APIKEY = 1,
 };
 
 struct _GtFeedServerPrivate {
@@ -43,58 +43,58 @@ static void
 get_property(GObject *object, guint property_id,
 	     GValue *value, GParamSpec *pspec)
 {
-        GtFeedServer *self = GT_FEED_SERVER(object);
+	GtFeedServer *self = GT_FEED_SERVER(object);
 	GObject *feed = G_OBJECT(self->priv->feed);
 
-        switch (property_id) {
-        case PROP_APIKEY:
+	switch (property_id) {
+	case PROP_APIKEY:
 		g_object_get_property(feed, "api-key", value);
-                break;
-        default:
-                G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
-        }
+		break;
+	default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
+	}
 }
 
 static void
 set_property(GObject *object, guint property_id,
 	     const GValue *value, GParamSpec *pspec)
 {
-        GtFeedServer *self = GT_FEED_SERVER(object);
+	GtFeedServer *self = GT_FEED_SERVER(object);
 	GObject *feed = G_OBJECT(self->priv->feed);
 
-        switch (property_id) {
-        case PROP_APIKEY:
+	switch (property_id) {
+	case PROP_APIKEY:
 		g_object_set_property(feed, "api-key", value);
-                break;
-        default:
-                G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
-        }
+		break;
+	default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
+	}
 }
 
 static void
 dispose(GObject *object)
 {
-        GtFeedServer *self = GT_FEED_SERVER(object);
-        g_object_unref(self->priv->feed);
+	GtFeedServer *self = GT_FEED_SERVER(object);
+	g_object_unref(self->priv->feed);
 
-        G_OBJECT_CLASS(gt_feed_server_parent_class)->dispose(object);
+	G_OBJECT_CLASS(gt_feed_server_parent_class)->dispose(object);
 }
 
 static void
 finalize(GObject *object)
 {
-        GtFeedServer *self = GT_FEED_SERVER(object);
-        g_dbus_node_info_unref(self->priv->dbusinfo);
+	GtFeedServer *self = GT_FEED_SERVER(object);
+	g_dbus_node_info_unref(self->priv->dbusinfo);
 
-        G_OBJECT_CLASS(gt_feed_server_parent_class)->finalize(object);
+	G_OBJECT_CLASS(gt_feed_server_parent_class)->finalize(object);
 }
 
 static void
 gt_feed_server_class_init(GtFeedServerClass *klass)
 {
-        GObjectClass *gclass = G_OBJECT_CLASS(klass);
+	GObjectClass *gclass = G_OBJECT_CLASS(klass);
 
-        g_type_class_add_private(klass, sizeof(GtFeedServerPrivate));
+	g_type_class_add_private(klass, sizeof(GtFeedServerPrivate));
 
 	gclass->dispose = dispose;
 	gclass->finalize = finalize;
@@ -116,7 +116,7 @@ gt_feed_server_init(GtFeedServer *self)
 	GError *error = NULL;
 	GtFeedServerPrivate *priv;
 
-        priv = self->priv = GET_PRIVATE(self);
+	priv = self->priv = GET_PRIVATE(self);
 
 	priv->feed = g_object_new(GT_TYPE_FEED, NULL);
 
@@ -131,27 +131,27 @@ gt_feed_server_init(GtFeedServer *self)
 GtFeedServer*
 gt_feed_server_new(const gchar *apikey)
 {
-        return g_object_new(GT_TYPE_FEED_SERVER, "api-key", apikey);
+	return g_object_new(GT_TYPE_FEED_SERVER, "api-key", apikey);
 }
 
 static GVariant*
 filter_search_result(GVariant *content)
 {
-        GVariant *data = NULL;
-        GVariantBuilder *builder = NULL;
-        GVariant *newArray = NULL;
-        GVariantBuilder *builder2 = NULL;
-        GVariant *emptyString = g_variant_new("s", "");
+	GVariant *data = NULL;
+	GVariantBuilder *builder = NULL;
+	GVariant *newArray = NULL;
+	GVariantBuilder *builder2 = NULL;
+	GVariant *emptyString = g_variant_new("s", "");
 
-        GVariant *array = NULL;
-        GVariantIter *arrayIter = NULL;
-        GVariant *array2 = NULL;
-        GVariantIter *array2Iter = NULL;
-        GVariant *key = NULL;
-        GVariant *value = NULL;
+	GVariant *array = NULL;
+	GVariantIter *arrayIter = NULL;
+	GVariant *array2 = NULL;
+	GVariantIter *array2Iter = NULL;
+	GVariant *key = NULL;
+	GVariant *value = NULL;
 
-        if (!content)
-                return NULL;
+	if (!content)
+		return NULL;
 
 	builder = g_variant_builder_new(G_VARIANT_TYPE("av"));
 
@@ -182,7 +182,7 @@ filter_search_result(GVariant *content)
 
 	g_variant_unref(content);
 
-        return data;
+	return data;
 }
 
 static void
