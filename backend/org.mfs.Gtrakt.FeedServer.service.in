@@ -1,5 +1,5 @@
 
 [D-BUS Service]
 Name=org.mfs.Gtrakt.FeedServer
-Exec=@prefix@/bin/feed-service
+Exec=@libexecdir@/feed-service
 

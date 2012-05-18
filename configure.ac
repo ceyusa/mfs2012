@@ -15,11 +15,23 @@ AC_PROG_LIBTOOL
 
 AC_HEADER_STDC
 
-PKG_CHECK_MODULES([DEPS],  [glib-2.0
+PKG_CHECK_MODULES([DEPS],  [dbus-1
+			    glib-2.0
 			    gio-2.0
 			    gobject-2.0
 			    libsoup-2.4
 			    json-glib-1.0])
+
+AC_ARG_WITH([services_dir],
+	    AS_HELP_STRING([--with-services-dir],
+            [Path to DBus services directory]))
+
+if test "x$with_services_dir" = "x" ; then
+   with_services_dir="`pkg-config --variable session_bus_services_dir dbus-1`"
+fi
+
+DBUS_SERVICES_DIR="$with_services_dir"
+AC_SUBST(DBUS_SERVICES_DIR)
 
 AC_CONFIG_FILES([
 	Makefile
@@ -27,5 +39,3 @@ AC_CONFIG_FILES([
 ])
 
 AC_OUTPUT
-
-AC_OUTPUT(backend/org.mfs.Gtrakt.FeedServer.service)
