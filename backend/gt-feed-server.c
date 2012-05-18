@@ -248,33 +248,6 @@ query(GtFeedServer *self,
 }
 
 static void
-apikey_get(GtFeedServer *self,
-	   GVariant *parameters,
-	   GDBusMethodInvocation *invocation)
-{
-    gchar *apikey = NULL;
-    g_object_get(self, "api-key", &apikey);
-    GVariant *result = g_variant_new("s", apikey);
-	g_dbus_method_invocation_return_value(invocation,
-					      g_variant_new_tuple(&result, 1));
-
-    g_free(apikey);
-}
-
-static void
-apikey_set(GtFeedServer *self,
-	   GVariant *parameters,
-	   GDBusMethodInvocation *invocation)
-{
-    gchar *apikey = NULL;
-    g_variant_get(parameters, "(s)", &apikey);
-    g_object_set(self, "api-key", apikey, NULL);
-    g_dbus_method_invocation_return_value(invocation, NULL);
-
-    g_free(apikey);
-}
-
-static void
 method_call(GDBusConnection *connection,
 	    const gchar *sender,
 	    const gchar *object_path,
@@ -288,18 +261,87 @@ method_call(GDBusConnection *connection,
 
 	if (g_strcmp0(method_name, "Query") == 0) {
 		query(self, parameters, invocation);
-	} else if (g_strcmp0(method_name, "Apikey_get") == 0) {
-		apikey_get(self, parameters, invocation);
-	} else if (g_strcmp0(method_name, "Apikey_set") == 0) {
-		apikey_set(self, parameters, invocation);
 	} else {
 		g_object_unref(invocation);
 	}
 }
 
+static GVariant *
+get_property_call(GDBusConnection *connection,
+		  const gchar *sender,
+		  const gchar *object_path,
+		  const gchar *interface_name,
+		  const gchar *property_name,
+		  GError **error,
+		  gpointer data)
+{
+	GtFeedServer *self = GT_FEED_SERVER(data);
+	GVariant *ret = NULL;
+
+	if (g_strcmp0(property_name, "ApiKey") == 0) {
+		gchar *apikey = NULL;
+
+		g_object_get(self, "api-key", &apikey, NULL);
+		ret = g_variant_new("s", apikey ? apikey : "");
+		g_free(apikey);
+	}
+
+	return ret;
+}
+
+static gboolean
+apikey_set(GtFeedServer *self,
+	   GDBusConnection *connection,
+	   const gchar *object_path,
+	   GVariant *value)
+{
+	GError *error = NULL;
+	const gchar *apikey = g_variant_get_string(value, NULL);
+
+	if (!apikey)
+		return TRUE;
+
+	g_object_set(self, "api-key", apikey, NULL);
+
+	g_dbus_connection_emit_signal(connection,
+				      NULL,
+				      object_path,
+				      "org.freedesktop.DBus.Properties",
+				      "PropertiesChanged",
+				      NULL,
+				      &error);
+	if (error) {
+		g_error_free(error);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+static gboolean
+set_property_call(GDBusConnection *connection,
+		  const gchar *sender,
+		  const gchar *object_path,
+		  const gchar *interface_name,
+		  const gchar *property_name,
+		  GVariant *value,
+		  GError **error,
+		  gpointer data)
+{
+	GtFeedServer *self = GT_FEED_SERVER(data);
+	gboolean ret = TRUE;
+
+	if (g_strcmp0(property_name, "ApiKey") == 0) {
+		ret = apikey_set(self, connection, object_path, value);
+	}
+
+	return ret;
+}
 
 static const GDBusInterfaceVTable iface_vtable = {
   .method_call = method_call,
+  .get_property = get_property_call,
+  .set_property = set_property_call,
 };
 
 guint

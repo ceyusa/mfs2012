@@ -35,12 +35,7 @@ static const gchar interface_xml[] =
   "      <arg type='i' name='type' direction='in'/>"
   "      <arg type='av' name='response' direction='out'/>"
   "    </method>"
-  "    <method name='Apikey_get'>"
-  "      <arg type='s' name='apikey' direction='out'/>"
-  "    </method>"
-  "    <method name='Apikey_set'>"
-  "      <arg type='s' name='apikey' direction='in'/>"
-  "    </method>"
+  "    <property type='s' name='ApiKey' access='readwrite' />"
   "  </interface>"
   "</node>";
 
