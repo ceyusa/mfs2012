@@ -27,6 +27,8 @@ feed_service_CFLAGS = \
 feed_service_LDADD = \
 	$(DEPS_LIBS)
 
+dbusdir=$(datadir)/dbus-1/services
+dbus_DATA=org.mfs.Gtrakt.FeedServer.service
 
 MAINTAINERCLEANFILES =	\
 	*.in \

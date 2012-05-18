@@ -27,3 +27,5 @@ AC_CONFIG_FILES([
 ])
 
 AC_OUTPUT
+
+AC_OUTPUT(backend/org.mfs.Gtrakt.FeedServer.service)
