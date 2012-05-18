@@ -1,4 +1,4 @@
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk, Pango
 import constants
 from preferencesdialog import PreferencesDialog
 from feed_server import FeedServer
@@ -38,30 +38,29 @@ class TraktorWindow(Gtk.Window):
         program_entry = self._get_entry()
         search_box.pack_start(program_entry, False, False, 0)
 
-
-        self.store = Gtk.ListStore(int, str, str)
-
+        self.store = Gtk.ListStore(object, str, str)
+        scrollview = Gtk.ScrolledWindow()
         view = Gtk.TreeView(self.store)
-        renderer = Gtk.CellRendererText()
-        column = Gtk.TreeViewColumn('Title', renderer, text=1)
-        view.append_column(column)
+        scrollview.add(view)
+        scrollview.set_property("min-content-height", 255)
 
         renderer = Gtk.CellRendererText()
-        column = Gtk.TreeViewColumn('Description', renderer, text=2)
+        renderer.set_property("ellipsize", Pango.EllipsizeMode.END)
+        
+        column = Gtk.TreeViewColumn('Title', renderer, text=1)
+        column.set_property("min-width", 200)
+        column.set_property("resizable", True)
         view.append_column(column)
+
+        column = Gtk.TreeViewColumn('Description', renderer, text=2)
+        column.set_property("min-width", 400)
+        column.set_property("resizable", True)
+        view.append_column(column)
+        
         view.connect('row-activated', self._on_row_activated)
 
-        box.add(view)
-
-        self._update_list()
-
+        box.add(scrollview)
         self.connect('delete-event', self._quit)
-
-    def _update_list(self):
-        self.store.append([0, 'Cars', 'A red car...'])
-        self.store.append([1, 'Toy Story', 'Buzz and Buddy...'])
-        self.store.append([2, 'Up', 'A house with baloons...'])
-
 
     def _setup_ui_manager(self):
         ui_manager = Gtk.UIManager()
@@ -111,7 +110,7 @@ class TraktorWindow(Gtk.Window):
         response=preferences.run()
         if response == Gtk.ResponseType.OK:
             entry_value = preferences.entry.get_text()
-            result_set = fs.apikey_set(entry_value) ;
+            result_set = fs.apikey_set(entry_value)
             preferences.destroy()
 
         elif response == Gtk.ResponseType.CANCEL:
@@ -157,9 +156,11 @@ class TraktorWindow(Gtk.Window):
         feed_server.search(search_text, search_type, self._on_query_response)
 
     def _on_query_response(self, results):
+        self.store.clear()
         for res in results:
             if res.has_key("title"):
                 title = res["title"]
             else:
                 title = res["episode"]["title"]
             print "%s" % (title)
+            self.store.append([res, res['title'], res['overview']])
