@@ -7,8 +7,9 @@ MENU_UI = '''
 <ui>
     <menubar name="MenuBar">
         <menu action="TraktorMenu">
-            <menuitem action="About" />
             <menuitem action="Preferences" />
+            <menuitem action="About" />
+            <separator />
             <menuitem action="Quit" />
         </menu>
     </menubar>
