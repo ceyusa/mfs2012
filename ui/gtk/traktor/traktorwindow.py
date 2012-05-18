@@ -140,7 +140,7 @@ class TraktorWindow(Gtk.Window):
 
     def _on_search_icon_pressed(self, program_entry, icon_pos, event):
         self._on_send_query(program_entry.get_text(),
-        self.program_combo.get_active_text())
+                            int(self.program_combo.get_active_id()))
 
     def _on_search_enter_pressed(self, program_entry):
         self._on_send_query(program_entry.get_text(),
