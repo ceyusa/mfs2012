@@ -140,13 +140,19 @@ class TraktorWindow(Gtk.Window):
         return search_entry
 
     def _on_search_icon_pressed(self, program_entry, icon_pos, event):
-        query = self._get_query(program_entry)
-        print "Selected: id=%s, type=%s, text=%s" % (query)
+        self._on_send_query(program_entry.get_text(),
+        self.program_combo.get_active_text())
 
     def _on_search_enter_pressed(self, program_entry):
-        query = self._get_query(program_entry)
-        print "Selected: id=%s, type=%s, text=%s" % (query)
+        self._on_send_query(program_entry.get_text(),
+        self.program_combo.get_active_text())
 
-    def _get_query(self, program_entry):
-        return (self.program_combo.get_active_id(),
-        self.program_combo.get_active_text(), program_entry.get_text())
+    def _on_send_query(self, search_text, search_type):
+        feed_server = FeedServer()
+        feed_server.search('batman', constants.SEARCH_MOVIES_TYPE,
+        self._on_query_response)
+
+    def _on_query_response(self, results):
+        for res in results:
+            title = res["title"]
+            print "%s" % (title)
