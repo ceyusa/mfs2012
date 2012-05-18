@@ -1,4 +1,4 @@
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 import constants
 from preferencesdialog import PreferencesDialog
 from feed_server import FeedServer
@@ -87,6 +87,12 @@ class TraktorWindow(Gtk.Window):
     def _on_about_action(self, action):
         about = Gtk.AboutDialog()
         about.set_program_name("Traktor")
+        about.set_version("0.1")
+        about.set_copyright( "Master Free Software 2011/2012" )
+        about.set_license(Gtk.License.GPL_3_0.value_name)
+        about.set_comments("A client for the Tratk.tv service")
+        about.set_website("https://github.com/ceyusa/mfs2012")
+        about.set_authors("Master Free Software 2011/2012")
         about.run()
         about.destroy()
 
