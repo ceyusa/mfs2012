@@ -9,6 +9,7 @@ MENU_UI = '''
         <menu action="TraktorMenu">
             <menuitem action="About" />
             <menuitem action="Preferences" />
+            <menuitem action="Quit" />
         </menu>
     </menubar>
 </ui>
@@ -76,6 +77,9 @@ class TraktorWindow(Gtk.Window):
                 ('About', Gtk.STOCK_ABOUT,
                  '_About', None, 'About this application',
                  self._on_about_action),
+                ('Quit', Gtk.STOCK_QUIT,
+                 '_Quit', None, 'Quit application',
+                 self._on_quit),
                 ])
         ui_manager.insert_action_group(action_group)
         return ui_manager
@@ -85,6 +89,9 @@ class TraktorWindow(Gtk.Window):
         about.set_program_name("Traktor")
         about.run()
         about.destroy()
+
+    def _on_quit(self, data):
+        Gtk.main_quit()
 
     def _on_row_activated(self, tree_view, path, column):
         item = tree_view.get_model().get_iter(path)
