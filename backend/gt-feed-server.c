@@ -177,7 +177,7 @@ static GVariant *
 filter_search_result(GVariant *content)
 {
 	if (g_variant_n_children(content) == 0)
-		return content;
+		return g_variant_ref(content);
 
 	return filter_item(content);
 }
@@ -187,7 +187,7 @@ cb(GObject *source,
    GAsyncResult *res,
    void *data)
 {
-	GVariant *content;
+	GVariant *content, *filtered;
 	GError *error = NULL;
 	GtFeed *feed = GT_FEED(source);
 	GDBusMethodInvocation *invocation = data;
@@ -198,9 +198,10 @@ cb(GObject *source,
 		return;
 	}
 
-	content = filter_search_result(content);
+	filtered = filter_search_result(content);
+	g_variant_unref(content);
 	g_dbus_method_invocation_return_value(invocation,
-					      g_variant_new_tuple(&content,1));
+					      g_variant_new_tuple(&filtered,1));
 }
 
 static void
