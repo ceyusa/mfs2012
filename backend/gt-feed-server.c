@@ -110,6 +110,29 @@ gt_feed_server_class_init(GtFeedServerClass *klass)
                                      G_PARAM_STATIC_STRINGS));
 }
 
+struct cont {
+        GDBusConnection *connection;
+        const gchar *object_path;
+        const gchar *interface_name;
+};
+
+static void
+response_cb(GtFeed *feed, gpointer data)
+{
+        GError *error = NULL;
+        struct cont *cont = (struct cont *) data;
+
+        g_dbus_connection_emit_signal(connection,
+				      NULL,
+				      cont->object_path,
+				      cont->interface_name,
+				      "ResponseReceived",
+				      NULL,
+				      &error);
+
+        g_free(cont);
+}
+
 static void
 gt_feed_server_init(GtFeedServer *self)
 {
@@ -260,6 +283,11 @@ method_call(GDBusConnection *connection,
         GtFeedServer *self = GT_FEED_SERVER(data);
 
         if (g_strcmp0(method_name, "Query") == 0) {
+                struct cont *cont = (struct cont *) g_malloc(sizeof(cont));
+                cont->connection = connection;
+                cont->object_path = object_path;
+                cont->interface_name = interface_name;
+                g_signal_connect(self->priv->feed, "response-received", G_CALLBACK(response_cb), cont);
                 query(self, parameters, invocation);
         } else {
                 g_object_unref(invocation);

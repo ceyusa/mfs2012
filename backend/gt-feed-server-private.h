@@ -36,6 +36,7 @@ static const gchar interface_xml[] =
   "      <arg type='av' name='response' direction='out'/>"
   "    </method>"
   "    <property type='s' name='ApiKey' access='readwrite' />"
+  "    <signal name='ResponseReceived' />"
   "  </interface>"
   "</node>";
 
