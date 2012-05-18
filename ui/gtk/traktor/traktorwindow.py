@@ -144,7 +144,7 @@ class TraktorWindow(Gtk.Window):
 
     def _on_search_enter_pressed(self, program_entry):
         self._on_send_query(program_entry.get_text(),
-        self.program_combo.get_active_text())
+                            int(self.program_combo.get_active_id()))
 
     def _on_send_query(self, search_text, search_type):
         feed_server = FeedServer()
