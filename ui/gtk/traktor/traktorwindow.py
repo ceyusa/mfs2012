@@ -148,8 +148,7 @@ class TraktorWindow(Gtk.Window):
 
     def _on_send_query(self, search_text, search_type):
         feed_server = FeedServer()
-        feed_server.search('batman', constants.SEARCH_MOVIES_TYPE,
-        self._on_query_response)
+        feed_server.search(search_text, search_type, self._on_query_response)
 
     def _on_query_response(self, results):
         for res in results:
