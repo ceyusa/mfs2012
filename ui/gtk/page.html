@@ -1,0 +1,23 @@
+<html>
+	<head>
+		<style type="text/css">
+			.image{background-image: url(%(imageSrc)s); width:201px; height:281px; float:left;}
+			.filmData{width: 400px; margin-left: 30px; float:left;}
+			.image, .filmData{display:inline;}
+			.label{font-size: 12px; font-weight: bold; display:inline;}
+			.filmDescription{padding-left: 5px; margin-bottom:10px;}
+			h1{font-size: 24px;}
+			h2{font-size: 12px; font-weight:normal;}
+		</style>
+	</head>
+	<body>
+		<div class='image'></div>
+		<div class='filmData'>
+			<h1>%(title)s</h1>
+			<h2><div class='label'>Rate: </div>%(rate)s</h2>
+			<h2><div class='label'>Description: </div></h2>
+			<h2><div class='filmDescription'>%(description)s</div></h2>
+			<h2><div class='label'>Actors: </div>%(actors)s</h2>
+		</div>
+	</body>
+</html>

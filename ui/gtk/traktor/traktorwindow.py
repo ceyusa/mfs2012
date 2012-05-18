@@ -1,7 +1,8 @@
-from gi.repository import Gtk, Pango
+from gi.repository import Gtk, Pango, WebKit
 import constants
 from preferencesdialog import PreferencesDialog
 from feed_server import FeedServer
+import os
 
 MENU_UI = '''
 <ui>
@@ -46,7 +47,7 @@ class TraktorWindow(Gtk.Window):
 
         renderer = Gtk.CellRendererText()
         renderer.set_property("ellipsize", Pango.EllipsizeMode.END)
-        
+
         column = Gtk.TreeViewColumn('Title', renderer, text=1)
         column.set_property("min-width", 200)
         column.set_property("resizable", True)
@@ -56,11 +57,37 @@ class TraktorWindow(Gtk.Window):
         column.set_property("min-width", 400)
         column.set_property("resizable", True)
         view.append_column(column)
-        
+
         view.connect('row-activated', self._on_row_activated)
 
         box.add(scrollview)
         self.connect('delete-event', self._quit)
+
+        webkit_view = WebKit.WebView()
+        htmlFile = self.read_html(os.path.abspath("./page.html"))
+
+        data = {
+                'imageSrc': 'http://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/200px-Real_Madrid_CF.svg.png',
+                'title': 'Html gtk lesson',
+                'rate': '10/10',
+                'description': 'This is an example of populate string for Joaquim',
+                'actors': 'Diego Bernardez',
+        }
+
+        webkit_view.load_string(htmlFile%data, "text/html", "utf-8", "")
+        box.add(webkit_view)
+
+    def read_html(self, url):
+        file = open(url)
+        htmlFile = ""
+        while 1:
+                line = file.readline()
+                if not line:
+                        break
+                else:
+                        htmlFile += line
+
+        return htmlFile
 
     def _setup_ui_manager(self):
         ui_manager = Gtk.UIManager()
