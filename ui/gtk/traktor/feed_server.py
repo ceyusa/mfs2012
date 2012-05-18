@@ -10,7 +10,6 @@ from constants import *
 BUS_NAME = 'org.mfs.Gtrakt.FeedServer'
 OBJECT_PATH = '/org/mfs/Gtrakt/FeedServer'
 
-
 class FeedServer:
     """ Proxy to query D-Bus service.  """
     def __init__(self):
@@ -22,12 +21,13 @@ class FeedServer:
             print("ERROR: Not found service")
             raise
         self.iface = dbus.Interface(proxy, dbus_interface=BUS_NAME)
+        self.props = dbus.Interface(proxy, 'org.freedesktop.DBus.Properties')
         self.last_result = None
         self.error = None
 
     def apikey_get(self):
         try:
-            apikey= self.iface.Apikey_get()
+            apikey = self.props.Get(BUS_NAME, 'ApiKey')
         except dbus.exceptions.DBusException:
             print("ERROR: Unable to connect")
             raise
@@ -35,7 +35,7 @@ class FeedServer:
 
     def apikey_set(self, apikey):
         try:
-            self.iface.Apikey_set(apikey)
+            self.props.Set(BUS_NAME, 'ApiKey', apikey)
         except dbus.exceptions.DBusException:
             print("ERROR: Unable to connect")
             raise
@@ -111,8 +111,6 @@ def test_feed_server_no_results():
     result = feed_server.last_result
     assert len(result) == 0
 
-
-
 def test_async():
     def the_callback(result):
         assert hasattr(result, "__getitem__")
@@ -120,7 +118,6 @@ def test_async():
     feed_server = FeedServer()
     feed_server.search('batman', the_callback)
     feed_server.run()
-
 
 if __name__ == '__main__':
     test_feed_server_movie()
