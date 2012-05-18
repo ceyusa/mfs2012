@@ -120,9 +120,9 @@ class TraktorWindow(Gtk.Window):
 
     def _get_combo(self):
         tv_programs = [
-        (repr(constants.SEARCH_EPISODES_TYPE),'Episodes'),
-        (repr(constants.SEARCH_MOVIES_TYPE), 'Movies'),
-        (repr(constants.SEARCH_SHOWS_TYPE), 'Shows')]
+        (repr(constants.SEARCH_MOVIES_TYPE),'Movies'),
+        (repr(constants.SEARCH_SHOWS_TYPE), 'Shows'),
+        (repr(constants.SEARCH_EPISODES_TYPE), 'Episodes')]
         program_combo = Gtk.ComboBoxText()
         for tv_program in tv_programs:
             program_combo.append(tv_program[0], tv_program[1])
