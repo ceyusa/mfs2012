@@ -1,11 +1,14 @@
 from gi.repository import Gtk
 import constants
+from preferencesdialog import PreferencesDialog
+from feed_server import FeedServer
 
 MENU_UI = '''
 <ui>
     <menubar name="MenuBar">
         <menu action="TraktorMenu">
             <menuitem action="About" />
+            <menuitem action="Preferences" />
         </menu>
     </menubar>
 </ui>
@@ -67,6 +70,9 @@ class TraktorWindow(Gtk.Window):
         action_group = Gtk.ActionGroup('Actions')
         action_group.add_actions([
                 ('TraktorMenu', None, '_Traktor', None, None, None),
+                ('Preferences', Gtk.STOCK_PREFERENCES,
+                 '_Preferences', None, 'Key Management',
+                 self._on_preferences_action),
                 ('About', Gtk.STOCK_ABOUT,
                  '_About', None, 'About this application',
                  self._on_about_action),
@@ -83,6 +89,20 @@ class TraktorWindow(Gtk.Window):
     def _on_row_activated(self, tree_view, path, column):
         item = tree_view.get_model().get_iter(path)
         print 'Title:', tree_view.get_model().get_value(item, 1)
+
+    def _on_preferences_action(self, action):
+        preferences = PreferencesDialog(self)
+        fs = FeedServer();
+
+        preferences.entry.set_text(fs.apikey_get())
+        response=preferences.run()
+        if response == Gtk.ResponseType.OK:
+            entry_value = preferences.entry.get_text()
+            result_set = fs.apikey_set(entry_value) ;
+            preferences.destroy()
+
+        elif response == Gtk.ResponseType.CANCEL:
+            preferences.destroy()
 
     def _quit(self, window, event):
         Gtk.main_quit()
