@@ -110,27 +110,33 @@ gt_feed_server_class_init(GtFeedServerClass *klass)
                                      G_PARAM_STATIC_STRINGS));
 }
 
-struct cont {
-        GDBusConnection *connection;
-        const gchar *object_path;
-        const gchar *interface_name;
-};
-
 static void
 response_cb(GtFeed *feed, gpointer data)
 {
         GError *error = NULL;
-        struct cont *cont = (struct cont *) data;
+        GDBusConnection *connection =
+                g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, &error);
+
+        if (!connection) {
+                g_printerr("Error getting session bus: %s\n", error->message);
+                g_error_free(error);
+                return;
+        }
 
         g_dbus_connection_emit_signal(connection,
-				      NULL,
-				      cont->object_path,
-				      cont->interface_name,
-				      "ResponseReceived",
-				      NULL,
-				      &error);
+                                      NULL,
+                                      "/org/mfs/Gtrakt/FeedServer",
+                                      "org.mfs.Gtrakt.FeedServer",
+                                      "ResponseReceived",
+                                      NULL,
+                                      &error);
 
-        g_free(cont);
+        if (error) {
+                g_printerr("Error emitting signal: %s\n", error->message);
+                g_error_free(error);
+        }
+
+        g_object_unref(connection);
 }
 
 static void
@@ -142,6 +148,8 @@ gt_feed_server_init(GtFeedServer *self)
         priv = self->priv = GET_PRIVATE(self);
 
         priv->feed = g_object_new(GT_TYPE_FEED, NULL);
+        g_signal_connect(self->priv->feed, "response-received",
+                         G_CALLBACK(response_cb), NULL);
 
         priv->dbusinfo = g_dbus_node_info_new_for_xml(interface_xml, &error);
         if (error) {
@@ -283,11 +291,6 @@ method_call(GDBusConnection *connection,
         GtFeedServer *self = GT_FEED_SERVER(data);
 
         if (g_strcmp0(method_name, "Query") == 0) {
-                struct cont *cont = (struct cont *) g_malloc(sizeof(cont));
-                cont->connection = connection;
-                cont->object_path = object_path;
-                cont->interface_name = interface_name;
-                g_signal_connect(self->priv->feed, "response-received", G_CALLBACK(response_cb), cont);
                 query(self, parameters, invocation);
         } else {
                 g_object_unref(invocation);
