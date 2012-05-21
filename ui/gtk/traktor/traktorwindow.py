@@ -63,19 +63,12 @@ class TraktorWindow(Gtk.Window):
         box.add(scrollview)
         self.connect('delete-event', self._quit)
 
-        webkit_view = WebKit.WebView()
-        htmlFile = self.read_html(os.path.abspath("./page.html"))
-
-        data = {
-                'imageSrc': 'http://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/200px-Real_Madrid_CF.svg.png',
-                'title': 'Html gtk lesson',
-                'rate': '10/10',
-                'description': 'This is an example of populate string for Joaquim',
-                'actors': 'Diego Bernardez',
-        }
-
-        webkit_view.load_string(htmlFile%data, "text/html", "utf-8", "")
-        box.add(webkit_view)
+        self.webkit_view = WebKit.WebView()
+        program = {'imageSrc': 'http://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/200px-Real_Madrid_CF.svg.png',
+        'title': 'Looking for the 10th', 'rate': '10/10',
+        'description': 'This film tells the story of the best team on earth'}
+        self._set_webkit(program)
+        box.add(self.webkit_view)
 
     def read_html(self, url):
         file = open(url)
@@ -127,7 +120,20 @@ class TraktorWindow(Gtk.Window):
 
     def _on_row_activated(self, tree_view, path, column):
         item = tree_view.get_model().get_iter(path)
-        print 'Title:', tree_view.get_model().get_value(item, 1)
+        program_dict = tree_view.get_model().get_value(item, 0)
+        rate = repr(program_dict["ratings"]["percentage"]/10.)
+        rate += '/10'
+
+        if program_dict['images'].has_key("poster"):
+            image_type = 'poster'
+        else:
+            image_type = 'screen'
+
+        program = {'imageSrc': program_dict['images'][image_type],
+        'title': program_dict['title'],
+        'rate': rate,
+        'description':  program_dict['overview']}
+        self._set_webkit(program)
 
     def _on_preferences_action(self, action):
         preferences = PreferencesDialog(self)
@@ -169,6 +175,16 @@ class TraktorWindow(Gtk.Window):
         search_entry.connect("icon-press", self._on_search_icon_pressed)
         search_entry.connect("activate", self._on_search_enter_pressed)
         return search_entry
+
+    def _set_webkit(self, program):
+        htmlFile = self.read_html(os.path.abspath("./page.html"))
+        data = {
+                'imageSrc': program['imageSrc'],
+                'title': program['title'],
+                'rate': program['rate'],
+                'description': program['description'],
+        }
+        self.webkit_view.load_string(htmlFile%data, "text/html", "utf-8", "")
 
     def _on_search_icon_pressed(self, program_entry, icon_pos, event):
         self._on_send_query(program_entry.get_text(),
