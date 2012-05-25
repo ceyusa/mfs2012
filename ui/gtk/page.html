@@ -1,9 +1,8 @@
 <html>
 	<head>
 		<style type="text/css">
-			.image{background-image: url(%(imageSrc)s); width:201px; height:281px; float:left;}
 			.filmData{width: 400px; margin-left: 30px; float:left;}
-			.image, .filmData{display:inline;}
+			.filmData{display:inline;}
 			.label{font-size: 12px; font-weight: bold; display:inline;}
 			.filmDescription{padding-left: 5px; margin-bottom:10px;}
 			h1{font-size: 24px;}
@@ -11,7 +10,7 @@
 		</style>
 	</head>
 	<body>
-		<div class='image'></div>
+		<div style="float:left;"><img src="%(imageSrc)s" width="201" height="281" /><div/>
 		<div class='filmData'>
 			<h1>%(title)s</h1>
 			<h2><div class='label'>Rate: </div>%(rate)s</h2>
