@@ -109,7 +109,7 @@ class TraktorWindow(Gtk.Window):
         about.set_version("0.1")
         about.set_copyright( "Master Free Software 2011/2012" )
         about.set_license_type(Gtk.License.GPL_3_0)
-        about.set_comments("A client for the Tratk.tv service")
+        about.set_comments("A client for the Trakt.tv service")
         about.set_website("https://github.com/ceyusa/mfs2012")
         about.set_authors(["Master Free Software 2011/2012",None])
         about.run()
