@@ -22,23 +22,35 @@ class TraktorWindow(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self)
         self.set_title('Traktor')
-        self.set_size_request(500, 300)
+        self.set_size_request(800, 600)
 
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self.add(box)
-
+		# Top container (for the menu, combo and search)
+        top_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        self.add(top_box)
         self.ui_manager = self._setup_ui_manager()
         menu_bar = self.ui_manager.get_widget('/MenuBar')
-        box.pack_start(menu_bar, False, False, 0)
-
-        search_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        box.pack_start(search_box, False, False, 0)
-
+        top_box.pack_start(menu_bar, False, False, 0)
+        
+        # Combo and search text entry
+        search_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL,spacing=20)
         self.program_combo = self._get_combo()
         search_box.pack_start(self.program_combo, False, False, 0)
         program_entry = self._get_entry()
+        program_entry.set_size_request(300,10)
         search_box.pack_start(program_entry, False, False, 0)
-
+        top_box.pack_start(search_box, False, False, 0)
+        
+        # Container for the rest
+        content_box = Gtk.Box(True, orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        #content_box.set_homogeneus()
+        top_box.pack_start(content_box, True, True, 0)
+        
+        # Left UI section (combo, search and results)
+        left_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        #left_box.set_size_request(400,600)
+        content_box.pack_start(left_box, True, True, 0)
+                
+        # Results (left)
         self.store = Gtk.ListStore(object, str, str)
         scrollview = Gtk.ScrolledWindow()
         view = Gtk.TreeView(self.store)
@@ -49,26 +61,32 @@ class TraktorWindow(Gtk.Window):
         renderer.set_property("ellipsize", Pango.EllipsizeMode.END)
 
         column = Gtk.TreeViewColumn('Title', renderer, text=1)
-        column.set_property("min-width", 200)
+        column.set_property("min-width", 100)
         column.set_property("resizable", True)
         view.append_column(column)
 
         column = Gtk.TreeViewColumn('Description', renderer, text=2)
-        column.set_property("min-width", 400)
+        column.set_property("min-width", 250)
         column.set_property("resizable", True)
         view.append_column(column)
 
         view.connect('row-activated', self._on_row_activated)
+        left_box.pack_start(scrollview, True, True, 5)
 
-        box.add(scrollview)
-        self.connect('delete-event', self._quit)
-
+		# Webkit window (right)
+        right_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         self.webkit_view = WebKit.WebView()
         program = {'imageSrc': 'http://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/200px-Real_Madrid_CF.svg.png',
         'title': 'Looking for the 10th', 'rate': '10/10',
         'description': 'This film tells the story of the best team on earth'}
         self._set_webkit(program)
-        box.add(self.webkit_view)
+        right_box.pack_start(self.webkit_view, True, True, 0)
+        content_box.pack_start(right_box, True, True, 0);
+
+		
+
+        self.connect('delete-event', self._quit)
+
 
     def read_html(self, url):
         file = open(url)
