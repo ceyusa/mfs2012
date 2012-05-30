@@ -68,10 +68,7 @@ class TraktorWindow(Gtk.Window):
         self.connect('delete-event', self._quit)
 
         self.webkit_view = WebKit.WebView()
-        program = {'imageSrc': 'http://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/200px-Real_Madrid_CF.svg.png',
-        'title': 'Looking for the 10th', 'rate': '10/10',
-        'description': 'This film tells the story of the best team on earth'}
-        self._set_webkit(program)
+        self.webkit_view.open(os.path.dirname(__file__) + "/Welcome.html")
         paned.add2(self.webkit_view)
         paned.set_position(width * .4)
 
