@@ -74,10 +74,7 @@ class TraktorWindow(Gtk.Window):
         # Webkit window (right)
         right_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         self.webkit_view = WebKit.WebView()
-        program = {'imageSrc': 'http://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/200px-Real_Madrid_CF.svg.png',
-        'title': 'Looking for the 10th', 'rate': '10/10',
-        'description': 'This film tells the story of the best team on earth'}
-        self._set_webkit(program)
+        self.webkit_view.open(os.path.dirname(__file__) + "/Welcome.html")
         right_box.pack_start(self.webkit_view, True, True, 0)
         content_box.pack_start(right_box, True, True, 0);
 
