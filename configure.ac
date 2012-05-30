@@ -1,7 +1,7 @@
 AC_PREREQ([2.62])
 
-AC_INIT([gtrakt], [0.1.0], [mfs-dm-2011@igalia.com],
-	[gtrakt], [https://github.com/ceyusa/mfs2012])
+AC_INIT([traktor], [0.1.0], [mfs-dm-2011@igalia.com],
+	[traktor], [https://github.com/ceyusa/mfs2012])
 
 AC_CONFIG_SRCDIR([backend/feed-service.c])
 AC_CONFIG_HEADERS([config.h])
