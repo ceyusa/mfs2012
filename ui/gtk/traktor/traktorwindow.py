@@ -177,7 +177,7 @@ class TraktorWindow(Gtk.Window):
         return search_entry
 
     def _set_webkit(self, program):
-        htmlFile = self.read_html(os.path.abspath("./page.html"))
+        htmlFile = self.read_html(os.path.dirname(__file__) + "/../page.html")
         data = {
                 'imageSrc': program['imageSrc'],
                 'title': program['title'],
