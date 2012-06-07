@@ -204,6 +204,8 @@ class TraktorWindow(Gtk.Window):
 
     def _on_query_response(self, results):
         self.store.clear()
+        if not results:
+            return
         for res in results:
             if not res.has_key("title"):
                 res = res["episode"]
