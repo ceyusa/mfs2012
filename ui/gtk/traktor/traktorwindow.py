@@ -22,7 +22,8 @@ class TraktorWindow(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self)
         self.set_title('Traktor')
-        self.set_size_request(500, 300)
+        width = 900
+        self.set_size_request(width, 300)
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.add(box)
@@ -38,6 +39,9 @@ class TraktorWindow(Gtk.Window):
         search_box.pack_start(self.program_combo, False, False, 0)
         program_entry = self._get_entry()
         search_box.pack_start(program_entry, False, False, 0)
+
+        paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
+        box.pack_start(paned, True, True, 0)
 
         self.store = Gtk.ListStore(object, str, str)
         scrollview = Gtk.ScrolledWindow()
@@ -60,7 +64,7 @@ class TraktorWindow(Gtk.Window):
 
         view.connect('row-activated', self._on_row_activated)
 
-        box.add(scrollview)
+        paned.add1(scrollview)
         self.connect('delete-event', self._quit)
 
         self.webkit_view = WebKit.WebView()
@@ -68,7 +72,8 @@ class TraktorWindow(Gtk.Window):
         'title': 'Looking for the 10th', 'rate': '10/10',
         'description': 'This film tells the story of the best team on earth'}
         self._set_webkit(program)
-        box.add(self.webkit_view)
+        paned.add2(self.webkit_view)
+        paned.set_position(width * .4)
 
     def read_html(self, url):
         file = open(url)
