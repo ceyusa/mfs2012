@@ -69,7 +69,9 @@ class TraktorWindow(Gtk.Window):
 
         self.webkit_view = WebKit.WebView()
         self.webkit_view.open(os.path.dirname(__file__) + "/../Welcome.html")
-        paned.add2(self.webkit_view)
+        scrollview = Gtk.ScrolledWindow()
+        scrollview.add(self.webkit_view)
+        paned.add2(scrollview)
         paned.set_position(width * .4)
 
     def read_html(self, url):
