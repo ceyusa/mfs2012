@@ -44,7 +44,7 @@ class FeedServer:
     def search(self, query, query_type=SEARCH_MOVIES_TYPE, callback=None):
         self._callback = callback
         try:
-            feed = self.iface.Query(query, query_type,
+            feed = self.iface.Query('+'.join(query.split()), query_type,
                                     reply_handler=self.handle_result,
                                     error_handler=self.handle_error)
         except dbus.exceptions.DBusException:
