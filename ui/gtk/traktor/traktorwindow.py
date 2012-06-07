@@ -68,7 +68,7 @@ class TraktorWindow(Gtk.Window):
         self.connect('delete-event', self._quit)
 
         self.webkit_view = WebKit.WebView()
-        self.webkit_view.open(os.path.dirname(__file__) + "/Welcome.html")
+        self.webkit_view.open(os.path.dirname(__file__) + "/../Welcome.html")
         paned.add2(self.webkit_view)
         paned.set_position(width * .4)
 
